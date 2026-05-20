@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Typography, Card, Statistic, Row, Col, Table, Tag } from 'antd';
 import { UserOutlined, QuestionCircleOutlined, CheckCircleOutlined, TeamOutlined } from '@ant-design/icons';
+import { api } from '../utils/api';
 
 const { Title } = Typography;
 
@@ -8,7 +9,7 @@ export function StatsPage() {
   const [stats, setStats] = useState<any>({});
 
   useEffect(() => {
-    fetch('/api/admin/stats').then(r => r.json()).then(setStats).catch(() => {});
+    api.get('/api/admin/stats').then(setStats).catch(() => {});
   }, []);
 
   return (
@@ -26,16 +27,28 @@ export function StatsPage() {
 
 export function UsersPage() {
   const [users, setUsers] = useState<any[]>([]);
+
   useEffect(() => {
-    fetch('/api/admin/users').then(r => r.json()).then(setUsers).catch(() => {});
+    api.get<any[]>('/api/admin/users').then(setUsers).catch(() => {});
   }, []);
+
   return (
-    <div><Title level={4}>用户管理</Title>
-      <Table dataSource={users} rowKey="id" columns={[
-        { title: 'ID', dataIndex: 'id' }, { title: 'OpenID', dataIndex: 'openid', ellipsis: true },
-        { title: '状态', dataIndex: 'subscription_status', render: (v: string) => <Tag color={v === 'active' ? 'green' : 'orange'}>{v}</Tag> },
-        { title: '试用期截止', dataIndex: 'trial_expires_at' },
-      ]} />
+    <div>
+      <Title level={4}>用户管理</Title>
+      <Table
+        dataSource={users}
+        rowKey="id"
+        columns={[
+          { title: 'ID', dataIndex: 'id' },
+          { title: 'OpenID', dataIndex: 'openid', ellipsis: true },
+          {
+            title: '状态',
+            dataIndex: 'subscription_status',
+            render: (value: string) => <Tag color={value === 'active' ? 'green' : 'orange'}>{value}</Tag>,
+          },
+          { title: '试用期截止', dataIndex: 'trial_expires_at' },
+        ]}
+      />
     </div>
   );
 }

@@ -1,12 +1,15 @@
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
+import { AuthProvider } from '../src/contexts/AuthContext';
 import { App } from '../src/App';
 
 function renderAt(path: string) {
   return render(
     <MemoryRouter initialEntries={[path]}>
-      <App />
+      <AuthProvider>
+        <App />
+      </AuthProvider>
     </MemoryRouter>
   );
 }
@@ -17,7 +20,6 @@ describe('Login page', () => {
 
     expect(screen.getByRole('button', { name: /登.*录/ })).toBeDefined();
     expect(screen.getByText('题探管理后台')).toBeDefined();
-    // Ant Design Input with placeholder renders the placeholder as an aria-label or attribute
     const inputs = document.querySelectorAll('input');
     const placeholders = Array.from(inputs).map(i => i.getAttribute('placeholder'));
     expect(placeholders.some(p => p?.includes('账号'))).toBe(true);
@@ -32,12 +34,16 @@ describe('Sidebar navigation', () => {
   ];
 
   it('renders all 7 menu items in sidebar', () => {
+    localStorage.setItem('admin_token', 'fake-token-for-test');
+    localStorage.setItem('admin_username', 'admin');
     renderAt('/knowledge');
 
     for (const item of menuItems) {
       const elements = screen.getAllByText(item);
       expect(elements.length).toBeGreaterThanOrEqual(1);
     }
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('admin_username');
   });
 });
 
@@ -53,9 +59,12 @@ describe('Page routing', () => {
   ];
 
   it.each(pages)('$path renders $title as page heading', ({ path, title }) => {
+    localStorage.setItem('admin_token', 'fake-token-for-test');
+    localStorage.setItem('admin_username', 'admin');
     renderAt(path);
-    // Each page renders an <h4> with the title as heading
     const headings = screen.getAllByRole('heading', { level: 4 });
     expect(headings.some(h => h.textContent === title)).toBe(true);
+    localStorage.removeItem('admin_token');
+    localStorage.removeItem('admin_username');
   });
 });

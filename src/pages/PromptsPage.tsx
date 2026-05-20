@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Typography, Input, Button, List, message, Spin } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
+import { api } from '../utils/api';
 
 const { Title, Text } = Typography;
 const { TextArea } = Input;
@@ -22,21 +23,20 @@ export function PromptsPage() {
   const loadPrompts = async () => {
     setLoading(true);
     try {
-      const res = await fetch('/api/admin/prompts');
-      const data = await res.json();
+      const data = await api.get<Prompt[]>('/api/admin/prompts');
       setPrompts(data);
-      if (!selected && data.length > 0) {
-        setSelected(data[0]);
-        setEditing(data[0].template);
+      if (data.length > 0) {
+        setSelected(current => current ?? data[0]);
+        setEditing(current => current || data[0].template);
       }
-    } catch {
-      // API not available (e.g. in test environment)
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => { loadPrompts(); }, []);
+  useEffect(() => {
+    loadPrompts().catch(() => {});
+  }, []);
 
   const handleSelect = (prompt: Prompt) => {
     setSelected(prompt);
@@ -45,13 +45,16 @@ export function PromptsPage() {
 
   const handleSave = async () => {
     if (!selected) return;
-    const res = await fetch(`/api/admin/prompts/${selected.prompt_key}`, {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ template: editing }),
+
+    const updated = await api.put<Prompt>(`/api/admin/prompts/${selected.prompt_key}`, {
+      template: editing,
     });
-    if (!res.ok) throw new Error('Save failed');
-    const updated = await res.json();
+
+    setPrompts(current => current.map(prompt => (
+      prompt.prompt_key === selected.prompt_key
+        ? { ...prompt, template: updated.template, version: updated.version }
+        : prompt
+    )));
     setSelected({ ...selected, template: updated.template, version: updated.version });
     message.success('Prompt 已保存');
   };
@@ -68,7 +71,11 @@ export function PromptsPage() {
               renderItem={(item) => (
                 <List.Item
                   onClick={() => handleSelect(item)}
-                  style={{ cursor: 'pointer', background: selected?.prompt_key === item.prompt_key ? '#e6f4ff' : undefined, padding: '8px 12px' }}
+                  style={{
+                    cursor: 'pointer',
+                    background: selected?.prompt_key === item.prompt_key ? '#e6f4ff' : undefined,
+                    padding: '8px 12px',
+                  }}
                 >
                   <div>
                     <Text strong>{item.prompt_key}</Text>
@@ -90,10 +97,14 @@ export function PromptsPage() {
                 </div>
                 <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>保存</Button>
               </div>
-              {selected.description && <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>{selected.description}</Text>}
+              {selected.description ? (
+                <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
+                  {selected.description}
+                </Text>
+              ) : null}
               <TextArea
                 value={editing}
-                onChange={e => setEditing(e.target.value)}
+                onChange={(e) => setEditing(e.target.value)}
                 rows={20}
                 style={{ fontFamily: 'monospace' }}
               />

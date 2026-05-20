@@ -1,4 +1,5 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
+import { RequireAuth } from './components/RequireAuth';
 import { MainLayout } from './components/MainLayout';
 import { LoginPage } from './pages/LoginPage';
 import { KnowledgePage } from './pages/KnowledgePage';
@@ -10,7 +11,7 @@ export function App() {
   return (
     <Routes>
       <Route path="/login" element={<LoginPage />} />
-      <Route element={<MainLayout />}>
+      <Route element={<RequireAuth><MainLayout /></RequireAuth>}>
         <Route path="/knowledge" element={<KnowledgePage />} />
         <Route path="/questions" element={<QuestionsPage />} />
         <Route path="/prompts" element={<PromptsPage />} />

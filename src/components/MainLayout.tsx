@@ -1,9 +1,11 @@
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
-import { Layout, Menu } from 'antd';
+import { Layout, Menu, Dropdown } from 'antd';
 import {
   BookOutlined, QuestionCircleOutlined, CodeOutlined,
   BarChartOutlined, UserOutlined, ShoppingCartOutlined, SettingOutlined,
+  LogoutOutlined,
 } from '@ant-design/icons';
+import { useAuth } from '../contexts/AuthContext';
 
 const { Sider, Content, Header } = Layout;
 
@@ -20,6 +22,12 @@ const MENU_ITEMS = [
 export function MainLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { username, logout } = useAuth();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -36,8 +44,16 @@ export function MainLayout() {
         />
       </Sider>
       <Layout>
-        <Header style={{ background: '#fff', padding: '0 24px' }}>
+        <Header style={{ background: '#fff', padding: '0 24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <span style={{ fontSize: 16 }}>TopicFinder 管理后台</span>
+          <Dropdown
+            menu={{ items: [{ key: 'logout', icon: <LogoutOutlined />, label: '退出登录', onClick: handleLogout }] }}
+          >
+            <span style={{ cursor: 'pointer' }}>
+              <UserOutlined style={{ marginRight: 8 }} />
+              {username}
+            </span>
+          </Dropdown>
         </Header>
         <Content style={{ margin: 24, padding: 24, background: '#fff', borderRadius: 8 }}>
           <Outlet />
