@@ -4,14 +4,7 @@ import { LoginPage } from './pages/LoginPage';
 import { KnowledgePage } from './pages/KnowledgePage';
 import { PromptsPage } from './pages/PromptsPage';
 import { QuestionsPage } from './pages/QuestionsPage';
-import { PlaceholderPage } from './pages/PlaceholderPage';
-
-const OTHER_ROUTES = [
-  { path: '/stats', title: '数据统计' },
-  { path: '/users', title: '用户管理' },
-  { path: '/orders', title: '订单管理' },
-  { path: '/settings', title: '系统配置' },
-];
+import { StatsPage, UsersPage, OrdersPage, SettingsPage } from './pages/AdminPages';
 
 export function App() {
   return (
@@ -21,9 +14,10 @@ export function App() {
         <Route path="/knowledge" element={<KnowledgePage />} />
         <Route path="/questions" element={<QuestionsPage />} />
         <Route path="/prompts" element={<PromptsPage />} />
-        {OTHER_ROUTES.map(({ path, title }) => (
-          <Route key={path} path={path} element={<PlaceholderPage title={title} />} />
-        ))}
+        <Route path="/stats" element={<StatsPage />} />
+        <Route path="/users" element={<UsersPage />} />
+        <Route path="/orders" element={<OrdersPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
       </Route>
       <Route path="*" element={<Navigate to="/knowledge" replace />} />
     </Routes>
