@@ -1,5 +1,7 @@
 # topicfinder-admin — Agent Notes
 
+**这是管理后台端。** 后台服务端在 `../topicfinder-server`，小程序端在 `../topicfinder-miniapp`。跨仓库开发使用 `workdir` 参数切换。领域术语见 `docs/CONTEXT.md`。
+
 ## Commands
 
 ```bash
